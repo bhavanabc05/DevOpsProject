@@ -25,8 +25,9 @@ export default function ChatWindow({ messages, pending, onAccept, onReject }) {
       {pending?.type === "correction" && (
         <CorrectionPopup
           original={pending.original}
-          corrected={pending.corrected}
+          improved={pending.improved}
           changes={pending.changes}
+          tone={pending.tone}
           onAccept={onAccept}
           onReject={onReject}
         />
