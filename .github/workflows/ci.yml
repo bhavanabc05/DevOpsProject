@@ -1,0 +1,39 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: actions/setup-buildx-action@v3
+
+    - name: Build Backend Image
+      run: |
+        docker build -t chat-backend ./backend
+
+    - name: Build Frontend Image
+      run: |
+        docker build -t chat-frontend ./frontend --build-arg VITE_BACKEND_URL=http://localhost:5000
+
+    - name: Verify Containers
+      run: |
+        docker compose up -d
+        docker ps
+        sleep 10
+        curl -f http://localhost:5000/health || exit 1
