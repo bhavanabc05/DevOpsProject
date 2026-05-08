@@ -2,16 +2,16 @@ const express = require('express');
 const router = express.Router();
 
 const TONE_INSTRUCTIONS = {
-  formal: "Rewrite in a formal, professional academic tone. Use complete sentences, proper grammar, and avoid contractions or slang.",
-  casual: "Rewrite in a relaxed, everyday conversational tone. Keep it natural and easy-going, like texting a friend.",
-  friendly: "Rewrite in a warm, positive, and approachable tone. Make it sound cheerful and welcoming.",
-  professional: "Rewrite in a polished business tone. Be concise, clear, and respectful — suitable for workplace communication.",
-  empathetic: "Rewrite with empathy and emotional sensitivity. Acknowledge feelings and use compassionate language.",
-  assertive: "Rewrite in a confident, direct tone. Be clear and firm without being rude.",
-  persuasive: "Rewrite to be more convincing and compelling. Use strong, positive language that motivates action.",
-  diplomatic: "Rewrite in a tactful, balanced tone. Be polite and considerate while still being clear.",
-  enthusiastic: "Rewrite with energy and excitement. Use expressive, upbeat language that shows genuine interest.",
-  concise: "Rewrite as briefly as possible. Remove all unnecessary words while keeping the full meaning."
+  formal:       "Use formal academic language. Complete sentences, proper grammar, no contractions or slang.",
+  casual:       "Use relaxed everyday language. Natural and easy-going, like texting a close friend.",
+  friendly:     "Use warm and approachable language. Cheerful and welcoming but not over the top.",
+  professional: "Use polished business language. Concise, clear, and respectful for workplace communication.",
+  empathetic:   "Use emotionally sensitive language. Show understanding and compassion.",
+  assertive:    "Use confident and direct language. Clear and firm without being aggressive.",
+  persuasive:   "Use compelling language. Strong and positive to motivate the reader.",
+  diplomatic:   "Use tactful and balanced language. Polite and considerate while remaining clear.",
+  enthusiastic: "Use energetic and expressive language. Show genuine excitement and interest.",
+  concise:      "Use minimal words. Remove everything unnecessary while keeping the full meaning."
 };
 
 router.post('/', async (req, res) => {
@@ -30,43 +30,76 @@ router.post('/', async (req, res) => {
         messages: [
           {
             role: 'system',
-            content: `You are an expert writing assistant. Always improve the user's message.
+            content: `You are a TEXT REWRITING assistant. You ONLY rewrite text. You NEVER reply to it.
 
-TONE: ${toneInstruction}
+CRITICAL RULE: The user input is a MESSAGE THEY ARE SENDING TO SOMEONE ELSE — not a message to you.
+You must rewrite it as if you are the user — keeping their voice, intent, and meaning.
 
-STRICT RULES:
+YOUR ONLY TASKS:
+1. Fix spelling mistakes and grammar errors
+2. Rewrite the message in this tone: ${toneInstruction}
 
-- NEVER answer questions — only rephrase them
-- NEVER add information the user didn't say
-- NEVER change what the user is asking or saying
-- Keep it as a message someone would send in a chat app
-- Always fix spelling and grammar AND rewrite in the requested tone
-- Keep the original meaning
+ABSOLUTE PROHIBITIONS:
+- NEVER answer a question — rewrite it instead
+- NEVER say "I'd be happy to help" or any response-like phrase
+- NEVER add facts, answers, or content the user did not write
+- NEVER change the purpose or intent of the message
+- NEVER write from the perspective of the recipient
 
-EXAMPLE INPUT: "hav a nice day"
-EXAMPLE OUTPUT:
+REWRITING LOGIC BY MESSAGE TYPE:
+- Statement → rewrite it more clearly in the chosen tone
+- Question → rewrite the question itself more clearly in the chosen tone
+- Request → rewrite the request more politely/clearly in the chosen tone
+- Greeting → rewrite the greeting in the chosen tone
+
+EXAMPLES OF CORRECT BEHAVIOR:
+
+Input: "can you help me with project"
+Tone: friendly
+WRONG: "I'd be delighted to help you with your project! What do you need?"
+RIGHT: "Hey, could you help me out with my project? I'd really appreciate it!"
+
+Input: "what time is meeting"
+Tone: professional
+WRONG: "The meeting is scheduled for 3 PM."
+RIGHT: "Could you please let me know what time the meeting is scheduled?"
+
+Input: "i dont understand this topic"
+Tone: formal
+WRONG: "I would be happy to explain this topic to you."
+RIGHT: "I am having difficulty understanding this topic and would appreciate some clarification."
+
+Input: "wanna grab lunch"
+Tone: formal
+WRONG: "Yes, I would love to grab lunch with you."
+RIGHT: "Would you like to join me for lunch?"
+
+Input: "hav a nice day"
+Tone: friendly
+RIGHT: "Have a wonderful day!"
+
+Return ONLY this JSON with no markdown, no backticks, no extra text:
 {
-  "improved": "Have a wonderful day!",
-  "changes": ["Fixed spelling: 'hav' → 'Have'", "Added enthusiasm for friendly tone"],
-  "tone": "friendly"
-}
-
-Return ONLY valid JSON. No markdown, no backticks, no explanation outside the JSON.`
-
+  "improved": "the rewritten message here",
+  "changes": ["Fixed: spelling of 'hav' → 'Have'", "Tone: added warmth for friendly tone"],
+  "tone": "${tone}"
+}`
           },
-          { role: 'user', content: text }
+          {
+            role: 'user',
+            content: text
+          }
         ],
-        temperature: 0.4,
+        temperature: 0.3,
         max_tokens: 500
       })
     });
 
     const data = await response.json();
-    console.log('Groq raw response:', JSON.stringify(data));
     const raw = data.choices[0].message.content.trim();
     const clean = raw.replace(/```json|```/g, '').trim();
-    const result=JSON.parse(clean);
-    result.tone=tone;
+    const result = JSON.parse(clean);
+    result.tone = tone; // always force correct tone label
     res.json(result);
 
   } catch (err) {
