@@ -61,9 +61,10 @@ Return ONLY valid JSON. No markdown, no backticks, no explanation outside the JS
     const data = await response.json();
     console.log('Groq raw response:', JSON.stringify(data));
     const raw = data.choices[0].message.content.trim();
-    console.log('RAW GROQ RESPONSE:', raw);
     const clean = raw.replace(/```json|```/g, '').trim();
-    res.json(JSON.parse(clean));
+    const result=JSON.parse(clean);
+    result.tone=tone;
+    res.json(result);
 
   } catch (err) {
     console.error('Groq error:', err.message);

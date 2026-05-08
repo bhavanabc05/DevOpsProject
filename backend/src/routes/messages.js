@@ -15,19 +15,15 @@ router.get('/', async (req, res) => {
 // POST /api/messages — save a new message
 router.post('/', async (req, res) => {
   try {
-    console.log('Saving message body:', req.body);  // ← add this
+    console.log('📥 Save request body:', req.body);
     const { text, originalText, wasCorrected, tone } = req.body;
-
-    if (!text || !originalText) {
-      return res.status(400).json({ error: 'text and originalText are required' });
-    }
-
     const message = new Message({ text, originalText, wasCorrected, tone });
-    await message.save();
-    res.status(201).json(message);
+    const saved = await message.save();
+    console.log('✅ Saved successfully:', saved._id);
+    res.status(201).json(saved);
   } catch (err) {
-    console.error('Message save error:', err.message);  // ← add this
-    res.status(500).json({ error: err.message });       // ← return actual error
+    console.error('❌ Save error:', err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 

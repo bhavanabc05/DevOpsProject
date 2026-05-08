@@ -11,11 +11,19 @@ export async function correctMessage(text, tone = 'formal') {
 }
 
 export async function saveMessage(text, originalText, wasCorrected, tone) {
-  await fetch(`${BACKEND_URL}/api/messages`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, originalText, wasCorrected, tone })
-  });
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, originalText, wasCorrected, tone })
+    });
+    const data = await res.json();
+    console.log('saveMessage response:', res.status, data);
+    if (!res.ok) throw new Error(data.error || 'Save failed');
+    return data;
+  } catch (err) {
+    console.error('saveMessage error:', err.message);
+  }
 }
 
 export async function loadMessages() {
