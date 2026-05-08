@@ -35,8 +35,11 @@ router.post('/', async (req, res) => {
 TONE: ${toneInstruction}
 
 STRICT RULES:
-- "improved" must ALWAYS be a complete, natural sentence — never a list, never bullet points, never corrections like "'word' should be 'word'"
-- "changes" must be short descriptions of what you changed, like "Fixed spelling of 'hav' to 'Have'"
+
+- NEVER answer questions — only rephrase them
+- NEVER add information the user didn't say
+- NEVER change what the user is asking or saying
+- Keep it as a message someone would send in a chat app
 - Always fix spelling and grammar AND rewrite in the requested tone
 - Keep the original meaning
 
