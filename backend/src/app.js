@@ -8,7 +8,7 @@ const correctRoute  = require('./routes/correct');
 
 const app = express();
 
-// Middleware
+// This is the Middleware
 app.use(cors({
   origin: [
     'http://localhost:5173',   // Vite dev server
